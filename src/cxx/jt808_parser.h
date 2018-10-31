@@ -14,31 +14,9 @@
 #define HTTP_ERRNO_MAP(XX)                                           \
   /* No error */                                                     \
   XX(OK, "success")                                                  \
-                                                                     \
-  /* Callback-related errors */                                      \
-  XX(CB_HeadersComplete, "the onHeadersComplete callback failed")    \
-  XX(CB_Body, "the onBody callback failed")                          \
-  XX(CB_MessageComplete, "the onMessageComplete callback failed")    \
-                                                                     \
-  /* Parsing-related errors */                                       \
   XX(INVALID_EOF_STATE, "stream ended at an unexpected time")        \
-  XX(HEADER_OVERFLOW,                                                \
-     "too many header bytes seen; overflow detected")                \
-  XX(CLOSED_CONNECTION,                                              \
-     "data received after completed connection: close message")      \
   XX(INVALID_VERSION, "invalid HTTP version")                        \
-  XX(INVALID_URL, "invalid URL")                                     \
-  XX(INVALID_HOST, "invalid host")                                   \
-  XX(INVALID_PORT, "invalid port")                                   \
-  XX(INVALID_PATH, "invalid path")                                   \
-  XX(INVALID_QUERY_STRING, "invalid query string")                   \
-  XX(INVALID_FRAGMENT, "invalid fragment")                           \
-  XX(LF_EXPECTED, "LF character expected")                           \
   XX(INVALID_HEADER_TOKEN, "invalid character in header")            \
-  XX(INVALID_CONTENT_LENGTH,                                         \
-     "invalid character in content-length header")                   \
-  XX(UNEXPECTED_CONTENT_LENGTH,                                      \
-     "unexpected content-length header")                             \
   XX(INVALID_CHUNK_SIZE,                                             \
      "invalid character in chunk size header")                       \
   XX(INVALID_CONSTANT, "invalid constant string")                    \
@@ -433,67 +411,6 @@ struct pkg_content {
     uint16_t        received;
 
 };
-
-
-class IJT808ParserCallback {
-public:
-    virtual ~IJT808ParserCallback() {}
-    virtual void onJt808ParseError(unsigned int err,
-                    uint16_t msg_id,
-                    uint16_t prop,
-                    uint16_t sn,
-                    uint16_t package_count,
-                    uint16_t package_index,
-                    const char* imei) = 0;
-    virtual void onJt808Message(
-                    uint16_t msg_id,
-                    bool rsa,
-                    uint16_t sn,
-                    uint16_t package_count,
-                    uint16_t package_index,
-                    const char* imei,
-                    pkg_content* data) = 0;
-};
-
-class JT808Parser {
-public:
-    ~JT808Parser();
-
-protected:
-    friend class Parser;
-
-    JT808Parser(bool debug);
-    void init();
-
-    void setDecRSA(uint32_t e, uint8_t* n, uint16_t n_size, uint8_t* d, uint16_t d_size);
-    // 0 parsed 1 in parsing 2 no 0xfe found 3 error 
-    size_t execute(IJT808ParserCallback* callback, const char *data, size_t len);
-
-private:
-    unsigned int http_errno_;
-    pkg_content info_;
-
-    char        rsaBlock_[128];
-    uint8_t     rsaIndex_;
-
-    uint16_t    parsedLength_;
-    uint16_t    headerSize_;
-    uint16_t    contentLength_;
-    uint8_t     calcChecksum_;
-    bool        contentEncrypted_;
-    bool        convertMode_;
-
-    uint16_t    messageId_;
-    uint16_t    messageProp_;
-    uint16_t    serialNo_;
-    char        IMEI_[13];
-    uint16_t    packagesCount_;
-    uint16_t    packageIndex_;
-
-    const bool debugMode_;
-    RSA* rsa_;
-};
-
 
 
 #endif
