@@ -1,9 +1,66 @@
 #ifndef __JT808_PARSER_H__
 #define __JT808_PARSER_H__
 
-#include "http_parser.h"
+#include "types.h"
+#include <vector>
+#include <string>
 #include <openssl/rsa.h>
 
+
+/* Map for errno-related constants
+ *
+ * The provided argument should be a macro that takes 2 arguments.
+ */
+#define HTTP_ERRNO_MAP(XX)                                           \
+  /* No error */                                                     \
+  XX(OK, "success")                                                  \
+                                                                     \
+  /* Callback-related errors */                                      \
+  XX(CB_HeadersComplete, "the onHeadersComplete callback failed")    \
+  XX(CB_Body, "the onBody callback failed")                          \
+  XX(CB_MessageComplete, "the onMessageComplete callback failed")    \
+                                                                     \
+  /* Parsing-related errors */                                       \
+  XX(INVALID_EOF_STATE, "stream ended at an unexpected time")        \
+  XX(HEADER_OVERFLOW,                                                \
+     "too many header bytes seen; overflow detected")                \
+  XX(CLOSED_CONNECTION,                                              \
+     "data received after completed connection: close message")      \
+  XX(INVALID_VERSION, "invalid HTTP version")                        \
+  XX(INVALID_URL, "invalid URL")                                     \
+  XX(INVALID_HOST, "invalid host")                                   \
+  XX(INVALID_PORT, "invalid port")                                   \
+  XX(INVALID_PATH, "invalid path")                                   \
+  XX(INVALID_QUERY_STRING, "invalid query string")                   \
+  XX(INVALID_FRAGMENT, "invalid fragment")                           \
+  XX(LF_EXPECTED, "LF character expected")                           \
+  XX(INVALID_HEADER_TOKEN, "invalid character in header")            \
+  XX(INVALID_CONTENT_LENGTH,                                         \
+     "invalid character in content-length header")                   \
+  XX(UNEXPECTED_CONTENT_LENGTH,                                      \
+     "unexpected content-length header")                             \
+  XX(INVALID_CHUNK_SIZE,                                             \
+     "invalid character in chunk size header")                       \
+  XX(INVALID_CONSTANT, "invalid constant string")                    \
+  XX(INVALID_INTERNAL_STATE, "encountered unexpected internal state")\
+  XX(STRICT, "strict mode assertion failed")                         \
+  XX(BAD_CONVERT_CODE, "0x7d expect 0x01 or 0x02")                   \
+  XX(UNEXPECT_MAGIC, "unexpected 0x7e in message")                   \
+  XX(CHECKSUM_ERROR, "checksum error")                               \
+  XX(DECRYPT_RSA_FAIL, "rsa error")                                  \
+  XX(UNKNOWN, "an unknown error occurred")
+
+
+/* Define HPE_* values for each errno value above */
+#define HTTP_ERRNO_GEN(n, s) HPE_##n,
+enum http_errno {
+  HTTP_ERRNO_MAP(HTTP_ERRNO_GEN)
+};
+#undef HTTP_ERRNO_GEN
+
+
+/* Return a string name of the given error */
+const char *http_errno_name(enum http_errno err);
 
 // 0x0001, 0x8001
 struct ALIGNBYTE GENERAL_ACK {

@@ -2,7 +2,6 @@
 #define __NODE_808_H__
 
 #include "jt808_parser.h"
-#include "jt809_parser.h"
 #include <nan.h>
 
 using v8::Object;
@@ -21,12 +20,5 @@ uint16_t bundlePackage(Local<Object>& pkg,
                     uint16_t package_count,
                     uint16_t package_index, 
                     pkg_content*);
-
-
-uint32_t bundlePackage(Local<Object>& pkg, 
-                    uint16_t msg_id,
-                    const pkg_content1*, 
-                    const char* data,
-                    uint32_t data_size);
 
 #endif

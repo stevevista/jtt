@@ -29,8 +29,7 @@ Release/obj.target/complex_parser/src/cxx/node_wrap.o: \
  ../node_modules/nan/nan_private.h \
  ../node_modules/nan/nan_typedarray_contents.h \
  ../node_modules/nan/nan_json.h ../src/cxx/jt808_parser.h \
- ../src/cxx/http_parser.h ../src/cxx/types.h \
- /home/lc/.node-gyp/8.12.0/include/node/openssl/rsa.h \
+ ../src/cxx/types.h /home/lc/.node-gyp/8.12.0/include/node/openssl/rsa.h \
  /home/lc/.node-gyp/8.12.0/include/node/openssl/asn1.h \
  /home/lc/.node-gyp/8.12.0/include/node/openssl/e_os2.h \
  /home/lc/.node-gyp/8.12.0/include/node/openssl/opensslconf.h \
@@ -42,8 +41,8 @@ Release/obj.target/complex_parser/src/cxx/node_wrap.o: \
  /home/lc/.node-gyp/8.12.0/include/node/openssl/opensslv.h \
  /home/lc/.node-gyp/8.12.0/include/node/openssl/ossl_typ.h \
  /home/lc/.node-gyp/8.12.0/include/node/openssl/symhacks.h \
- /home/lc/.node-gyp/8.12.0/include/node/openssl/bn.h \
- ../src/cxx/jt809_parser.h ../src/cxx/utils.h ../src/cxx/node_808.h
+ /home/lc/.node-gyp/8.12.0/include/node/openssl/bn.h ../src/cxx/utils.h \
+ ../src/cxx/node_808.h
 ../src/cxx/node_wrap.cc:
 ../src/cxx/node_wrap.h:
 ../node_modules/nan/nan.h:
@@ -77,7 +76,6 @@ Release/obj.target/complex_parser/src/cxx/node_wrap.o: \
 ../node_modules/nan/nan_typedarray_contents.h:
 ../node_modules/nan/nan_json.h:
 ../src/cxx/jt808_parser.h:
-../src/cxx/http_parser.h:
 ../src/cxx/types.h:
 /home/lc/.node-gyp/8.12.0/include/node/openssl/rsa.h:
 /home/lc/.node-gyp/8.12.0/include/node/openssl/asn1.h:
@@ -92,6 +90,5 @@ Release/obj.target/complex_parser/src/cxx/node_wrap.o: \
 /home/lc/.node-gyp/8.12.0/include/node/openssl/ossl_typ.h:
 /home/lc/.node-gyp/8.12.0/include/node/openssl/symhacks.h:
 /home/lc/.node-gyp/8.12.0/include/node/openssl/bn.h:
-../src/cxx/jt809_parser.h:
 ../src/cxx/utils.h:
 ../src/cxx/node_808.h:

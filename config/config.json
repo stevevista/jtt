@@ -10,30 +10,8 @@
     "port": 6379
   },
 
-  "jtt809": {
-    "monitorIp": "127.0.0.1",
-    "monitorPort": 8877,
-    "centerId": 100,
-    "version": "1.2.3",
-    "encrypt": {
-      "key": 0,
-      "M1": 0,
-      "IA1": 0,
-      "IC1": 0
-    },
-    "monitorEncrypt": {
-      "M1": 0,
-      "IA1": 0,
-      "IC1": 0
-    },
-    "userId": 1000,
-    "password": "12345678",
-    "serverIp": "127.0.0.1"
-  },
-
   "jtt808": {
-    "heartBeatInterval": 600000,
-    "enable809": true
+    "heartBeatInterval": 600000
   },
 
   "logger": {

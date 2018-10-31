@@ -87,7 +87,6 @@ OBJS := \
 	$(obj).target/$(TARGET)/src/cxx/node_wrap.o \
 	$(obj).target/$(TARGET)/src/cxx/node_808.o \
 	$(obj).target/$(TARGET)/src/cxx/jt808_pack.o \
-	$(obj).target/$(TARGET)/src/cxx/http_parser.o \
 	$(obj).target/$(TARGET)/src/cxx/jt808_parser.o
 
 # Add to the list of files we specially track dependencies for.
