@@ -1,29 +1,26 @@
-"use strict";
-
-const tree     = require('../utils/tree');
-
+"use strict"
 
 module.exports = function(sequelize, DataTypes) {
-    var Table = sequelize.define('iov_user_menus', {
-        sort_order: {type: DataTypes.INTEGER, allowNull: false}
-    }, {
-        freezeTableName: true, //选项表示，数据库中的表明与程序中的保持一致，否则数据库中的表名会以复数的形式命名
-        tableName: 'iov_user_menus'
-    });
+  const Table = sequelize.define('iov_user_menus', {
+    sort_order: {type: DataTypes.INTEGER, allowNull: false}
+  }, {
+    freezeTableName: true,
+    tableName: 'iov_user_menus',
+    timestamps: false
+  })
 
-    Table.associate = function(models) {
+  Table.associate = function(models) {
 
-        Table.removeAttribute('id');
+    Table.removeAttribute('id')
 
-        Table.belongsTo(models.iov_user, {
-          foreignKey: 'user_id'
-        });
+    Table.belongsTo(models.iov_user, {
+      foreignKey: 'userId'
+    })
 
-        Table.belongsTo(models.iov_menus, {
-          foreignKey: 'menu_id'
-        });
-    }
+    Table.belongsTo(models.iov_menus, {
+      foreignKey: 'menuId'
+    })
+  }
 
-    return Table;
-};
-
+  return Table
+}

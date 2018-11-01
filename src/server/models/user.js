@@ -9,7 +9,7 @@ const LEVEL_SUPER = 0;
 const LEVEL_MASTER = 1;
 const LEVEL_NORMAL = 100;
 
-const AUTH_TYPE_LIST = ['group', 'menu', 'instruction'];
+const AUTH_TYPE_LIST = ['group', 'menu', 'instruction']
 
 
 module.exports = function(sequelize, DataTypes) {
@@ -43,11 +43,11 @@ module.exports = function(sequelize, DataTypes) {
     Table.associate = function(models) {
 
         Table.hasMany(models.iov_user_auths, {
-            foreignKey: 'user_id'
+            foreignKey: 'userId'
         });
 
         Table.hasMany(models.iov_user_menus, {
-            foreignKey: 'user_id'
+            foreignKey: 'userId'
         });
     }
 
@@ -71,7 +71,7 @@ module.exports = function(sequelize, DataTypes) {
      * 
      * local master 拥有除 group 之外的最高权限
      */
-  Table.prototype.getAuths = async function(t) {
+  Table.prototype.getAuths = async function() {
 
     if (this.auths) {
       return this.auths
@@ -93,9 +93,7 @@ module.exports = function(sequelize, DataTypes) {
     }
 
     const out = await this.getUserauths({
-      attributes: ['ref_path', 'ref_type'],
-      where: {ref_type: {$notIn: Object.keys(auths)}},
-      transaction: t
+      where: {ref_type: {[Op.notIn]: Object.keys(auths)}}
     })
     
     out.forEach(r => {
@@ -301,68 +299,65 @@ module.exports = function(sequelize, DataTypes) {
     return this.authsTree
   }
 
-    Table.prototype.updateAuth = function(models, newauths, reqUser) {
+  Table.prototype.updateAuth = function(models, newauths, reqUser) {
 
-        let UserAuth = models.iov_user_auths;
+    const {iov_user_auths: UserAuth} = models
+    const userId = this.id
 
-        return sequelize.transaction(t=> {
+    return sequelize.transaction(async transaction => {
 
-            // 先获取旧权限
-            return this.getAuths(t).then((oldauths)=> {
+      // 先获取旧权限
+      const oldauths = await this.getAuths()
+      let records = []
+      let orRemoves = []
 
-                let records = [];
-                let orRemoves = [];
+      Object.keys(newauths).forEach(k => {
+        let news = newauths[k]
+        let old = oldauths[k]
 
-                Object.keys(newauths).forEach(k=> {
+        // 过滤掉自身重复, 如父节点已经包含子节点
+        news = news.filter(id => !id.isChildOf(news, true))
 
-                    let news = newauths[k];
-                    let old = oldauths[k];
+        if (old) {
+          // 其他的被删除
+          let collect = old.filter(id=> _.find(news, r=> r.eq(id)) == null && 
+                                                  reqUser.hasAuth(k, id))
+          if (collect.length > 0) {
+            orRemoves.push(UserAuth.authMatch(k, collect))
+          }
 
-                    // 过滤掉自身重复, 如父节点已经包含子节点
-                    news = news.filter(id=> !id.isChildOf(news, true));
+          // 删除重复的
+          news = news.filter(id=> _.find(old, r=> r.eq(id)) == null);
+        }
 
-                    if (old) {
-                    
-                        // 其他的被删除
-                        let collect = old.filter(id=> _.find(news, r=> r.eq(id)) == null && 
-                                                                reqUser.hasAuth(k, id));
-                        if (collect.length > 0) {
-                            orRemoves.push(UserAuth.authMatch(k, collect))
-                        }
-
-                        // 删除重复的
-                        news = news.filter(id=> _.find(old, r=> r.eq(id)) == null);
-                    }
-
-                    // 过滤掉自身重复, 如父节点已经包含子节点
-                    news.forEach(id=> {
-                        records.push({user_id: this.id, ref_type: k, ref_path: id.stringfy()});
-                    });
-                });
-
-                if (orRemoves.length === 0)
-                    return UserAuth.bulkCreate(records, {transaction: t});
-
-                return UserAuth.destroy({
-                    where: {
-                        user_id: this.id,
-                        $or: orRemoves
-                    },
-                    transaction: t
-                }).then(()=> {
-                    return UserAuth.bulkCreate(records, {transaction: t});
-                })
-            });
-        });
-    };
-
-    Table.prototype.destroySelf = function(models) {
-        return models.iov_user_auths.destroy({where: {user_id: this.id}}).then(()=> {
-            return models.iov_user_menus.destroy({where: {user_id: this.id}}).then(()=> {
-                return this.destroy()
-            })
+        // 过滤掉自身重复, 如父节点已经包含子节点
+        news.forEach(id => {
+          records.push({userId, ref_type: k, ref_path: id.stringfy()})
         })
-    }
+      })
 
-    return Table;
-};
+      if (orRemoves.length > 0) {
+        await UserAuth.destroy({
+          where: {
+            userId,
+            [Op.or]: orRemoves
+          },
+          transaction
+        })
+      }
+
+      await UserAuth.bulkCreate(records, {transaction})
+    })
+  }
+
+  Table.prototype.destroySelf = function(models) {
+    const userId = this.id
+    return sequelize.transaction(async transaction => {
+      await models.iov_user_auths.destroy({where: {userId}, transaction})
+      await models.iov_user_menus.destroy({where: {userId}, transaction})
+      await this.destroy({transaction})
+    })
+  }
+
+  return Table
+}
