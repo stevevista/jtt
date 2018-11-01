@@ -1,8 +1,9 @@
 "use strict";
+const Sequelize = require('sequelize')
+const _         = require('lodash')
+const tree = require('../utils/tree')
 
-const _         = require('lodash');
-const tree      = require('../utils/tree');
-
+const Op = Sequelize.Op
 
 const LEVEL_SUPER = 0;
 const LEVEL_MASTER = 1;
@@ -13,10 +14,11 @@ const AUTH_TYPE_LIST = ['group', 'menu', 'instruction'];
 
 module.exports = function(sequelize, DataTypes) {
 
-    let Table = sequelize.define("user", {
-        username: {type: DataTypes.STRING(32), unique: true, allowNull: false},//用户名
-        creator: DataTypes.STRING(32),//父用户名
-        password: DataTypes.STRING(120),
+  const Table = sequelize.define('iov_user', {
+    username: {type: DataTypes.STRING(32), unique: true, allowNull: false},
+    password: DataTypes.STRING(120),
+    creator: DataTypes.STRING(32),
+    type: DataTypes.STRING(50),
         auth_level: { type: DataTypes.INTEGER, defaultValue: LEVEL_NORMAL, allowNull: false },
         enabled: { type: DataTypes.BOOLEAN, defaultValue: true, allowNull: false },//是否可用
         cn_name: DataTypes.STRING(32),//中文名
@@ -30,12 +32,12 @@ module.exports = function(sequelize, DataTypes) {
         login_date: DataTypes.DATE, //登录时间
         ip: DataTypes.STRING(120), //用户机器IP
         login_type: { type: DataTypes.STRING(20), defaultValue: 'WEB', allowNull: false }, //登录方式 (需要数据库字段，当前只有网页登录,手机登录等)
-        version: { type: DataTypes.STRING(120), defaultValue: '', allowNull: false }, //客户版本号(需要数据库字段，但当前为空)
-        is_terminal: { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false }
-    }, {
-        tableName: 'iov_user',
-        freezeTableName: true, //选项表示，数据库中的表明与程序中的保持一致，否则数据库中的表名会以复数的形式命名
-    });
+        version: { type: DataTypes.STRING(120), defaultValue: '', allowNull: false } //客户版本号(需要数据库字段，但当前为空)
+  }, {
+    tableName: 'iov_user',
+    freezeTableName: true,
+    timestamps: true
+  })
 
 
     Table.associate = function(models) {
@@ -69,39 +71,39 @@ module.exports = function(sequelize, DataTypes) {
      * 
      * local master 拥有除 group 之外的最高权限
      */
-    Table.prototype.getAuths = function(t) {
+  Table.prototype.getAuths = async function(t) {
 
-        if (this.auths) {
-            return Promise.resolve(this.auths);
-        }
-
-        let auths = {};
-
-        if (this.isLocalMaster()) {
-            AUTH_TYPE_LIST.forEach(r=> {
-                auths[r] = [tree.treeId([])];
-            });
-
-            if (this.isSuperMaster()) {
-                this.auths = auths;
-                return Promise.resolve(auths);
-            }
-
-            delete auths['group'];
-        }
-
-        return this.getUserauths({
-            attributes: ['ref_path', 'ref_type'],
-            where: {ref_type: {$notIn: Object.keys(auths)}},
-            transaction: t
-        }).then(out=> {
-            out.forEach(r=> {
-                (auths[r.ref_type] || (auths[r.ref_type]=[])).push(tree.treeId(r.ref_path));
-            })
-            this.auths = auths;
-            return auths;
-        })
+    if (this.auths) {
+      return this.auths
     }
+
+    const auths = {}
+
+    if (this.isLocalMaster()) {
+      AUTH_TYPE_LIST.forEach(r => {
+        auths[r] = [tree.treeId([])]
+      })
+
+      if (this.isSuperMaster()) {
+        this.auths = auths
+        return auths
+      }
+
+      delete auths['group']
+    }
+
+    const out = await this.getUserauths({
+      attributes: ['ref_path', 'ref_type'],
+      where: {ref_type: {$notIn: Object.keys(auths)}},
+      transaction: t
+    })
+    
+    out.forEach(r => {
+      (auths[r.ref_type] || (auths[r.ref_type]=[])).push(tree.treeId(r.ref_path))
+    })
+    this.auths = auths
+    return auths
+  }
 
 
     /**
@@ -163,7 +165,7 @@ module.exports = function(sequelize, DataTypes) {
             ip: this.ip,
             login_type: this.login_type,
             version: this.version,
-            is_terminal: this.is_terminal
+            type: this.type
         };
     }
 
@@ -194,7 +196,7 @@ module.exports = function(sequelize, DataTypes) {
                 ip: this.ip,
                 login_type: this.login_type,
                 version: this.version,
-                is_terminal: this.is_terminal,
+                type: this.type,
                 auths: authlists
             };
         });
@@ -231,7 +233,7 @@ module.exports = function(sequelize, DataTypes) {
                 ip: this.ip,
                 login_type: this.login_type,
                 version: this.version,
-                is_terminal: this.is_terminal,
+                type: this.type,
                 auths: authlists,
                 authsTree: tree
             };
@@ -240,68 +242,64 @@ module.exports = function(sequelize, DataTypes) {
 
     
 
-    Table.prototype.getAuthsTree = function(models, types) {
+  Table.prototype.getAuthsTree = async function(models, types) {
 
-        types = types || ['terminal', 'menu', 'instruction'];
-        let names = [];
+    const {iov_device: Device} = models
 
-        if (!this.authsTree) {
-            this.authsTree = {};
-        }
+    types = types || ['terminal', 'menu', 'instruction']
+    let names = []
 
-        return this.getAuths().then((auths)=> {
-
-            let tasks = [];
-
-            types.forEach(t=> {
-                let name = (t === 'terminal') ? 'group' : t;
-                if (this.authsTree[name] == null) {
-
-                    let prop = {};
-
-                    if (name === 'group') {
-                        
-                        prop.include = [{
-                            model: models.iov_device
-                        }];
-                        prop.where = {$and: []};
-                        prop.createNode = (r)=> {
-                            let n = r.asNode();
-                            n.authed = this.maxAuth('group', r.treeId());
-                            if (r.terminal)
-                                n.name = r.terminal.plateNo;
-                            return n;
-                        };
-
-                        if (t === 'group') {
-                            prop.where.$and.push({is_terminal: false});
-                        }
-
-                        // 除非单独设定，不显示具体车辆
-                        //let ids = authGroups.map(r=> r.id);
-                        //prop.where.$and.push({$or: [{id: {$in:ids}}, {is_terminal: false}]});
-                    } else {
-                        prop.createNode = (r)=> {
-                            let n = r.asNode();
-                            n.authed = this.maxAuth(t, r.treeId());
-                            return n;
-                        };
-                    }
-
-                    names.push(name);
-                    tasks.push(models[name].asTree(auths[name], prop));
-                }
-            });
-
-            return Promise.all(tasks);
-            
-        }).then((rows)=> {
-            names.forEach((t, i)=> {
-                this.authsTree[t] = rows[i].roots;
-            });
-            return this.authsTree;
-        });
+    if (!this.authsTree) {
+      this.authsTree = {}
     }
+
+    const auths = await this.getAuths()
+    const tasks = []
+
+    types.forEach(t => {
+      const name = (t === 'terminal') ? 'group' : t
+      if (this.authsTree[name] === null) {
+        const prop = {}
+
+        if (name === 'group') {
+          prop.include = [{
+            model: Device
+          }]
+
+          prop.where = {[Op.and]: []}
+          prop.createNode = (r)=> {
+            let n = r.asNode()
+            n.authed = this.maxAuth('group', r.treeId())
+            if (r.terminal)
+              n.name = r.terminal.plateNo
+            return n
+          }
+
+          if (t === 'group') {
+            prop.where[Op.and].push({type: {[Op.ne]: 'TERM'}});
+          }
+          // 除非单独设定，不显示具体车辆
+          //let ids = authGroups.map(r=> r.id);
+          //prop.where.$and.push({$or: [{id: {$in:ids}}, {type: {[Op.ne]: 'TERM'}}]})
+        } else {
+          prop.createNode = (r)=> {
+            let n = r.asNode()
+            n.authed = this.maxAuth(t, r.treeId())
+            return n
+          }
+
+          names.push(name)
+          tasks.push(models[name].asTree(auths[name], prop))
+        }
+      }
+    })
+
+    const rows = await Promise.all(tasks)
+    names.forEach((t, i) => {
+      this.authsTree[t] = rows[i].roots
+    })
+    return this.authsTree
+  }
 
     Table.prototype.updateAuth = function(models, newauths, reqUser) {
 
