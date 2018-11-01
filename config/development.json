@@ -1,8 +1,0 @@
-{
-    "database": {
-        "dialect": "postgres",
-        "database": "iovdb",
-        "host": "/var/run/postgresql",
-        "timezone": "+08:00"
-    }
-}

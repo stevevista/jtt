@@ -3,10 +3,10 @@
 //const {buildClient} = require('./helpers/client');
 //const tool = require('./tool');
 const {ComplexParser} = require('bindings')('complex_parser');
-const encode = require('../lib/jt808/encoding/808');
+const encode = require('../src/server/jt808/encoding/808');
 const assert = require('assert');
 const _ = require('lodash');
-const {RSA} = require('../lib/jtt/rsa');
+const {RSA} = require('../src/server/jt808/rsa');
 
 
 function testCoding(messageId, done, opt, prop, check) {

@@ -10,6 +10,7 @@ tmp
 tests/*
 !tests/*.js
 ssl
+build
 package-lock.json
 npm-debug.log
 npm-debug.log.*

@@ -2,10 +2,10 @@
 
 
 const {buildClient} = require('./helpers/client');
-const encode = require('../lib/jt808/encoding/808');
+const encode = require('../src/server/jt808/encoding/808');
 const fs = require('fs');
 const _ = require('lodash');
-const {RSA} = require('../lib/jtt/rsa');
+const {RSA} = require('../src/server/jt808/rsa');
 
 let SN = 1;
 

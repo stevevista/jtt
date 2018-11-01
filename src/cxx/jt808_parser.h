@@ -15,10 +15,6 @@
   /* No error */                                                     \
   XX(OK, "success")                                                  \
   XX(INVALID_EOF_STATE, "stream ended at an unexpected time")        \
-  XX(INVALID_VERSION, "invalid HTTP version")                        \
-  XX(INVALID_HEADER_TOKEN, "invalid character in header")            \
-  XX(INVALID_CHUNK_SIZE,                                             \
-     "invalid character in chunk size header")                       \
   XX(INVALID_CONSTANT, "invalid constant string")                    \
   XX(INVALID_INTERNAL_STATE, "encountered unexpected internal state")\
   XX(STRICT, "strict mode assertion failed")                         \

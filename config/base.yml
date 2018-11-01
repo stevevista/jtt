@@ -1,0 +1,8 @@
+cluster: true
+appLogLevel: warn
+appLogSize: 31457280
+jtt808:
+  port: 3000
+  heartBeatInterval: 600000
+database:
+  storage: database.sqlite

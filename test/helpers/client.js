@@ -1,7 +1,7 @@
 'use strict';
 
 const net = require('net');
-const {ComplexParser} = require('../../lib/jt808/package');
+const {ComplexParser}   = require('bindings')('complex_parser');
 
 const HOST = '127.0.0.1';
 const PORT = 3000;
