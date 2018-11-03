@@ -1,0 +1,67 @@
+@import "../_var.less";
+@import "../_mixin.less";
+@w: 1.5rem;
+&.icon-checkbox,
+&.icon-radio {
+    .noselect();
+    &:active {
+        outline: 0;
+    }
+    &:focus {
+        outline: 0;
+    }
+    input {
+        width: 0;
+        height: 0;
+        visibility: hidden;
+        position: absolute;
+        &[disabled]+span {
+            color: @gray!important;
+            &:before {
+                color: @gray!important;
+            }
+        }
+    }
+    input+span {
+        width: @w;
+        position: relative;
+        display: inline-block;
+        font: normal normal normal 14px/1 FontAwesome;
+        &:before {
+            font-size: 1.3rem;
+            position: relative;
+            top: 1px;
+        }
+    }
+    input:checked+span {
+        &:before {
+            color: @green;
+        }
+    }
+    &.small {
+        input+span {
+            &:before {
+                top: 1px;
+                font-size: 1.1rem;
+            }
+        }
+    }
+}
+
+&.icon-checkbox {
+    input+span:before {
+        content: '\f096';
+    }
+    input:checked+span:before {
+        content: "\f14a";
+    }
+}
+
+&.icon-radio {
+    input+span:before {
+        content: '\f10c';
+    }
+    input:checked+span:before {
+        content: "\f192";
+    }
+}

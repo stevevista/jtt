@@ -1,0 +1,43 @@
+.left-nav-tabs(){
+    .left-nav-tabs{
+        background-color:@theme-d10;
+        width:4rem;
+        &>a{
+            border-bottom: 1px solid @theme-d15;
+            border-top: 1px solid @theme;
+            writing-mode: vertical-lr;
+            color: #fff;
+            padding: .8rem 1.2rem;
+            font-size: 1.1rem;
+            letter-spacing: .3rem;
+            display: block;
+            height: 7.5rem;
+            width: 100%;
+            &:not(.active){
+                .ripples();
+            }
+            &>em{
+                display:none;
+                position: absolute;
+                margin-left:12px;
+                left: 50%;
+                bottom: 42%;
+                border-bottom: 6px solid transparent;
+                border-top: 6px solid transparent;
+                border-right: 6px solid #fff;
+                border-left: 6px solid transparent;
+                background-color: transparent;
+            }
+            
+            &.active{
+                overflow: hidden;
+                position: relative;
+                cursor: not-allowed;
+                background-color:@theme-d20;
+                &>em{
+                    display: block;
+                }
+            }
+        }
+    }
+}

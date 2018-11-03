@@ -4,7 +4,7 @@ const tree     = require('../utils/tree');
 
 
 module.exports = function(sequelize, DataTypes) {
-    var Table = sequelize.define('iov_menus', {
+    var Table = sequelize.define("menu", {
         parents: {type: DataTypes.STRING(128), allowNull: false},
         name: {type: DataTypes.STRING(20), allowNull: false},
         deletes: { type: DataTypes.INTEGER, defaultValue: 0, allowNull: false },

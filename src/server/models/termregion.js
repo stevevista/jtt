@@ -2,8 +2,8 @@
 
 
 module.exports = function(sequelize, DataTypes) {
-    var Table = sequelize.define('iov_term_region', {
-        plateNo: DataTypes.STRING(20),
+    var Table = sequelize.define("term_region", {
+        plate_no: DataTypes.STRING(20),
         region_id: { type: DataTypes.INTEGER, defaultValue: DataTypes.NOW, allowNull: false },
         region_type: DataTypes.STRING(20),
         points: DataTypes.TEXT,
@@ -16,8 +16,8 @@ module.exports = function(sequelize, DataTypes) {
 
     Table.associate = function(models) {
         Table.removeAttribute('id');
-        Table.belongsTo(models.iov_device, {
-            foreignKey: 'simNo'
+        Table.belongsTo(models.terminal, {
+            foreignKey: 'sim_no'
         });
     }
 

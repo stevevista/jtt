@@ -6,7 +6,7 @@ const path = require('path')
 const router = new Router()
 
 router.get('/', ctx => {
-  ctx.redirect('/main.html')
+  ctx.redirect('/index.html')
 })
 
 const files = fs.readdirSync(__dirname)

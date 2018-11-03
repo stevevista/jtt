@@ -2,7 +2,7 @@
 
 
 module.exports = function(sequelize, DataTypes) {
-    var Table = sequelize.define('iov_terms_driver', {
+    var Table = sequelize.define("termsdriver", {
         name: DataTypes.STRING(30),
         is_iccard: { type: DataTypes.BOOLEAN, defaultValue: false },
         begin_date: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, allowNull: false },
@@ -21,13 +21,16 @@ module.exports = function(sequelize, DataTypes) {
     });
     
     Table.associate = function(models) {
-        Table.belongsTo(models.iov_group, {
-            foreignKey: 'groupId'
-        })
+        Table.belongsTo(models.group, {
+            foreignKey: 'group_id'
+        });
         
-        models.iov_driver.hasMany(Table, {
+        models.driver.hasMany(Table, {
             foreignKey: 'driver_id'
-        })
+        });
+        models.terminal.hasMany(Table, {
+            foreignKey: 'sim_no'
+        });
     }
 
     return Table;

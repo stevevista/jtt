@@ -2,9 +2,9 @@
 
 
 module.exports = function(sequelize, DataTypes) {
-    var Table = sequelize.define('iov_event_report', {
-        simNo: DataTypes.STRING(20),
-        plateNo: DataTypes.STRING(20),
+    var Table = sequelize.define("eventrpt", {
+        sim_no: DataTypes.STRING(20),
+        plate_no: DataTypes.STRING(20),
         created_date: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, allowNull: false }
     }, {
         tableName: 'iov_event_report',
@@ -13,8 +13,8 @@ module.exports = function(sequelize, DataTypes) {
     });
 
     Table.associate = function(models) {
-        Table.belongsTo(models.iov_event, {
-            foreignKey: 'eventId'
+        Table.belongsTo(models.event, {
+            foreignKey: 'event_id'
         });
     };
 

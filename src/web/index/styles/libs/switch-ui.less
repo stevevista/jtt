@@ -1,0 +1,92 @@
+@import "../_var.less";
+@n: switch-ui;
+@switch-theme: @green;
+@sui-width: 3.8rem;
+@sui-large-width: 4.5rem;
+@sui-small-width: 3rem;
+@sui-smaller-width: 2.5rem;
+.size(@width: @sui-width, @height: @sui-width * .6) {
+    input+span {
+        width: @width;
+        height: @height;
+        border-radius: @height *.7;
+        &:before {
+            border-radius: @height *.7;
+            width: @height - .4rem;
+            height: @height - .4rem;
+        }
+    }
+    input:checked+span {
+        background-color: @switch-theme;
+        &:before {
+            left: @width - @height;
+        }
+    }
+    input[disabled]:checked+span {
+        background-color: @gray;
+    }
+}
+
+.@{n} {
+    input {
+        width: 0;
+        height: 0;
+        visibility: hidden;
+        position: absolute;
+    }
+    .size();
+    input+span {
+        top: 0;
+        left: 0;
+        margin: 0 .3rem 0 0!important;
+        position: relative;
+        border: 1px solid darken(@link-hover-bgcolor, 5%);
+        background-color: @link-hover-bgcolor;
+        box-shadow: @base-bgcolor 0 0 0 0 inset;
+        background-clip: content-box;
+        display: inline-block;
+        vertical-align: middle;
+        -webkit-appearance: none;
+        user-select: none;
+        outline: none!important;
+        transition: border-color @duration-fastest + .1s, background-color ease @duration-fastest + .1s;
+        &:before {
+            content: '';
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            background-color: #fff;
+            transition: left @duration-fastest;
+        }
+    }
+    input:checked+span {
+        box-shadow: #dfdfdf 0 0 0 0 inset;
+    }
+    &.@{n}-small {
+        .size(@sui-small-width, @sui-small-width * .6);
+    }
+    &.@{n}-smaller {
+        .size(@sui-smaller-width, @sui-smaller-width * .6);
+    }
+    &.@{n}-mini {
+        .size(@sui-small-width, @sui-small-width * .4);
+    }
+    &.@{n}-large {
+        .size(@sui-large-width, @sui-large-width * .6);
+    }
+    &.@{n}-right {
+        input+span {
+            float: right;
+        }
+    }
+}
+
+.@{n}-box {
+    padding: .4rem;
+    label {
+        min-height: 17px;
+        margin-bottom: 0;
+        font-weight: normal;
+        cursor: pointer;
+    }
+}

@@ -19,8 +19,8 @@ module.exports = function(sequelize, DataTypes) {
     })
 
     Table.associate = function(models) {
-        Table.belongsTo(models.iov_device, {
-            foreignKey: 'simNo'
+        Table.belongsTo(models.terminal, {
+            foreignKey: 'sim_no'
         });
     }
 

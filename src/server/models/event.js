@@ -2,7 +2,7 @@
 
 
 module.exports = function(sequelize, DataTypes) {
-    var Table = sequelize.define('iov_event', {
+    var Table = sequelize.define("event", {
         content: {type: DataTypes.TEXT, allowNull: false},
         deleted: { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false }
     }, {
@@ -12,8 +12,8 @@ module.exports = function(sequelize, DataTypes) {
     });
 
     Table.associate = function(models) {
-        Table.hasMany(models.iov_event_report, {
-            foreignKey: 'eventId'
+        Table.hasMany(models.eventrpt, {
+            foreignKey: 'event_id'
         });
     };
 

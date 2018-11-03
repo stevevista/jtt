@@ -5,7 +5,7 @@ module.exports = function(sequelize, DataTypes) {
     var Track = sequelize.define("track", {
         command_id: DataTypes.INTEGER,
         valid: DataTypes.BOOLEAN,
-        plateNo: DataTypes.STRING(20),
+        plate_no: DataTypes.STRING(20),
         plate_color: DataTypes.INTEGER,
         pos_encrypt: DataTypes.INTEGER,
         latitude: DataTypes.FLOAT,
@@ -28,8 +28,8 @@ module.exports = function(sequelize, DataTypes) {
     })
 
     Track.associate = function(models) {
-        Track.belongsTo(models.iov_device, {
-            foreignKey: 'simNo'
+        Track.belongsTo(models.terminal, {
+            foreignKey: 'sim_no'
         });
     }
 

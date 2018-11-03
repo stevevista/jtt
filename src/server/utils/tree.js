@@ -1,8 +1,9 @@
 
-'use strict';
+'use strict'
+const Sequelize = require('sequelize')
+const _         = require('lodash')
 
-const _         = require('lodash');
-
+const Op = Sequelize.Op
 
 function treeId(s, childId) {
     let path, id = 0;
@@ -57,12 +58,18 @@ function treeId(s, childId) {
             return obj.path.indexOf(this.id)>= 0;
         },
 
-        isChildOf: function(obj, excludeEqual) {
-            if (_.isArray(obj) || obj == null) {
-                let r = _.find(obj, authed=> this._isChildOf(authed, excludeEqual));
-                return r != null;
-            }
-            return this._isChildOf(obj, excludeEqual);
+        isChildOfOrEqual: function(obj) {
+          if (_.isArray(obj)) {
+            return obj.some(authed => this._isChildOf(authed, false))
+          }
+          return this._isChildOf(obj, false)
+        },
+
+        isChildOf: function(obj) {
+          if (_.isArray(obj)) {
+            return obj.some(authed => this._isChildOf(authed, true))
+          }
+          return this._isChildOf(obj, true)
         },
 
         isParentOf: function(obj) {
@@ -86,16 +93,6 @@ function treeId(s, childId) {
         }
     };
 }
-
-
-/**
- * 过滤出符合另一个集合的子集
- * 
- */
-function filterChildOf(ids, parents, excludeEqual) {
-    return ids.filter(id=> id.isChildOf(parents, excludeEqual));
-}
-
 
 /**
  * 生成查询条件
@@ -138,23 +135,23 @@ function condition(sequelize, ids, options) {
     let or = []
     if (options.parents) {
         let list = _.union.apply(_, ids.map(r=> r.parent().path)); // 父节点
-        let cond = sequelize.where(col, {$in: list});
+        let cond = sequelize.where(col, {[Op.in]: list});
         or.push(cond);
     }
 
     if (options.self) {
-        or.push(sequelize.where(col, {$in: ids.map(r=> r.id)})); // 自己
+        or.push(sequelize.where(col, {[Op.in]: ids.map(r=> r.id)})); // 自己
     }
 
     if (options.children) {
-        let cond = sequelize.where(colParents, {$like: {$any: ids.map(r=> '%.'+ r.id +'.%')}}) // 子节点
+        let cond = sequelize.where(colParents, {[Op.like]: {[Op.any]: ids.map(r=> '%.'+ r.id +'.%')}}) // 子节点
         or.push(cond);
     }
 
     if (or.length === 1)
         return or[0];
     else 
-        return {$or: or};
+        return {[Op.or]: or};
 }
 
 
@@ -180,7 +177,7 @@ function keepOrder(list, key, rows, convert) {
 function _getPaths(table, ids, order) {
     return table.findAll({
         attributes: ['id', 'parents'],
-        where: {deletes: 0, id: {$in: ids}}
+        where: {deletes: 0, id: {[Op.in]: ids}}
     }).then(rows=> {
         if (order) {
             return keepOrder(ids, 'id', rows, _treeId);
@@ -190,22 +187,25 @@ function _getPaths(table, ids, order) {
 }
 
 
-function _asTree(sequelize, table, ids, options) {
+function _asTree(sequelize, table, ids, options = {}) {
 
-    options = _.extend({
-        parents: true,
-        idColumn: table.name + '.id',
-        parentsColumn: table.name + '.parents',
-    }, options);
+  options = {
+    parents: true,
+    idColumn: table.name + '.id',
+    parentsColumn: table.name + '.parents',
+    ...options
+  }
 
-    let conds = [{deletes: 0}, condition(sequelize, ids, options)];
+  console.log(options)
+
+    let conds = [{deletes: 0}, condition(sequelize, ids, options)]
 
     if (options.where) {
         conds.push(options.where);
     }
 
     let queryOpts = {
-        where: {$and: conds},
+        where: {[Op.and]: conds},
         order: [['parents'],['id']]
     };
 
@@ -263,24 +263,24 @@ function _isValidName(table, name, nodeid, refid) {
 
     let conds = [
             {deletes: 0}, 
-            {name: {$iLike: name}}
+            {name: {[Op.iLike]: name}}
         ];
 
     if (nodeid == null) {
         conds.push({parents: ''});
     } else {
-        conds.push({$or: [
-            {parents: {$like: '%.'+ nodeid.id +'.%'}}, // 子节点
-            {id: {$in: nodeid.path}} // 父节点或自己
+        conds.push({[Op.or]: [
+            {parents: {[Op.like]: '%.'+ nodeid.id +'.%'}}, // 子节点
+            {id: {[Op.in]: nodeid.path}} // 父节点或自己
         ]});
     }
 
     if (refid) {
-        conds.push({id: {$ne: refid}});
+        conds.push({id: {[Op.ne]: refid}});
     }
 
     return table.count({
-        where: {$and: conds}    
+        where: {[Op.and]: conds}    
     }).then(c=> {
         return (c === 0);
     })
@@ -353,6 +353,5 @@ exports.bindTable = function(sequelize, Table) {
 
 exports.truncate = truncate;
 exports.treeId = treeId;
-exports.filterChildOf = filterChildOf;
 exports.condition = condition;
 exports.keepOrder = keepOrder;

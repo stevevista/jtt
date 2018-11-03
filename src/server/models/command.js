@@ -7,7 +7,7 @@ module.exports = function(sequelize, DataTypes) {
         cmd: DataTypes.STRING(20),
         cmd_desc: DataTypes.STRING(512),
         cmd_type: DataTypes.INTEGER,
-        plateNo: DataTypes.STRING(20),
+        plate_no: DataTypes.STRING(20),
         status: DataTypes.INTEGER,
         cmd_data: DataTypes.TEXT,
         rsp_data: DataTypes.TEXT,
@@ -24,8 +24,8 @@ module.exports = function(sequelize, DataTypes) {
     })
 
     Table.associate = function(models) {
-        Table.belongsTo(models.iov_device, {
-            foreignKey: 'simNo'
+        Table.belongsTo(models.terminal, {
+            foreignKey: 'sim_no'
         });
     }
 

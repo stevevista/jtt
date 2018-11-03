@@ -1,0 +1,29 @@
+/*!
+ *  Font Awesome 4.5.0 by @davegandy - http://fontawesome.io - @fontawesome
+ *  License - http://fontawesome.io/license (Font: SIL OFL 1.1, CSS: MIT License)
+ */
+
+@import "./fontAwesome/variables.less";
+@import "./fontAwesome/mixins.less";
+
+@font-face {
+  font-family: 'FontAwesome';
+  src: url('@{icon-font-path}fontawesome-webfont.eot?v=@{fa-version}');
+  src: url('@{icon-font-path}fontawesome-webfont.eot?#iefix&v=@{fa-version}') format('embedded-opentype'),
+    url('@{icon-font-path}fontawesome-webfont.woff2?v=@{fa-version}') format('woff2'),
+    url('@{icon-font-path}fontawesome-webfont.woff?v=@{fa-version}') format('woff'),
+    url('@{icon-font-path}fontawesome-webfont.ttf?v=@{fa-version}') format('truetype'),
+    url('@{icon-font-path}fontawesome-webfont.svg?v=@{fa-version}#fontawesomeregular') format('svg');
+//  src: url('@{icon-font-path}/FontAwesome.otf') format('opentype'); // used when developing fonts
+  font-weight: normal;
+  font-style: normal;
+}
+@import "./fontAwesome/core.less";
+@import "./fontAwesome/larger.less";
+@import "./fontAwesome/fixed-width.less";
+@import "./fontAwesome/list.less";
+@import "./fontAwesome/bordered-pulled.less";
+@import "./fontAwesome/animated.less";
+@import "./fontAwesome/rotated-flipped.less";
+@import "./fontAwesome/stacked.less";
+@import "./fontAwesome/icons.less";

@@ -1,0 +1,15 @@
+settings.language: 语言
+settings.zh: 中文
+settings.en: 英文
+settings.adb: ADB
+settings.about: 关于
+settings.devSerial: 关联串口序号
+settings.logLevel: Log级别
+settings.port: 服务端口
+settings.exceptionPath: 异常信息文件
+settings.user: 登陆账号
+settings.user-level: 级别
+settings.server-group: 服务器
+settings.user-group: 登陆信息
+settings.users-group: 用户列表
+sidebar.setting: 设置

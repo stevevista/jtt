@@ -2,8 +2,9 @@
 
 
 module.exports = function(sequelize, DataTypes) {
-    var Table = sequelize.define('iov_driver', {
+    var Table = sequelize.define("driver", {
         name: {type: DataTypes.STRING(32), allowNull: false},
+        //group_id: DataTypes.INTEGER,
         iccard: {type: DataTypes.STRING(20), unique: true, allowNull: false},//从业资格证编码
         phone: DataTypes.STRING(20),
         authority: DataTypes.STRING(255),   //发证机构名称
@@ -17,8 +18,8 @@ module.exports = function(sequelize, DataTypes) {
     });
 
     Table.associate = function(models) {
-        Table.belongsTo(models.iov_group, {
-            foreignKey: 'groupId'
+        Table.belongsTo(models.group, {
+            foreignKey: 'group_id'
         });
     }
 

@@ -1,0 +1,89 @@
+@theme: #47a3da; //#3bafda;
+@green: @theme; //#4bd863;
+@body-bg: #444;
+@color: #666;
+@font-size: 12px;
+@base-bgcolor: #fafafa;
+@box-shadow: 0 .5rem 1rem rgba(0, 0, 0, 0.2);
+@gray: fade(@color, 60%);
+//COLOR
+@red: red;
+@danger: #a94442;
+//checkbox
+@checkbox: @theme;
+//link
+@link-hover-bgcolor: darken(@base-bgcolor, 5%);
+@link-select-bgcolor: darken(@base-bgcolor, 8%);
+//我们就可以分别使用函数darken()和lighten()使一种颜色深一点或者浅一点。
+@base-border-color: darken(@base-bgcolor, 5%);
+@base-border: 1px solid @base-border-color;
+@base-border2: 1px solid darken(#fff, 5%);
+
+/*Left区域*/
+
+@left-panel-width: 23rem;
+
+/* Left Menu*/
+
+@l-theme: @theme; //#283643;
+@l-color: lighten(@base-bgcolor, 10%); //#fff
+@l-b-border: 1px solid fade(#000, 6%);
+
+/* Left Menu Toggle-Button */
+
+@l-toggle-btn-width: 2rem;
+@l-toggle-btn-color: spin(@theme, 180);
+// ur li
+@li-active-bgcolor: spin(@theme, 180);
+@li-hover-bgcolor: fade(#000, 20%);
+
+/* 首页面 Top区域*/
+
+@top-color: @color;
+@top-theme: @base-bgcolor;
+@top-nav-l-border: 1px solid lighten(@top-theme, 5%);
+@top-nav-r-border: 1px solid darken(@top-theme, 5%);
+
+/*首页面 Tabs区域*/
+
+@nav-tab-active-bgcolor: spin(@theme, 180);
+@nav-tabs-height: 3.5rem;
+@nav-bborder: solid 2px @nav-tab-active-bgcolor;
+@nav-tab-minwidth: 8rem;
+
+/* 页面 header高度*/
+
+@header-height: 5.5rem;
+@header-menuitem-hover-bgcolor: @link-hover-bgcolor;
+
+/* pace */
+
+@pace-bg: spin(@theme, 180);
+
+/* zTree */
+
+
+/* 首页地图区域 */
+
+@home-map-toolbar-height: 32px;
+@home-map-toolbar-bgcolor: fade(#000, 30%);
+@home-map-toolbar-hover-bgcolor: fade(#000, 20%);
+
+/* 动画时间*/
+
+@duration-fast: .5s;
+@duration-fastest: .25s;
+@duration-fastest2: .15s;
+@duration-normal: 1s;
+@duration-hinge: 2s;
+
+/* 主题颜色 */
+
+@theme-d5: darken(@theme, 5%);
+@theme-d10: darken(@theme, 10%);
+@theme-d15: darken(@theme, 15%);
+@theme-d20: darken(@theme, 20%);
+@theme-l5: lighten(@theme, 5%);
+@theme-l10: lighten(@theme, 10%);
+@theme-l15: lighten(@theme, 15%);
+@theme-l20: lighten(@theme, 20%);

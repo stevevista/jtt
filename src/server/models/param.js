@@ -2,7 +2,7 @@
 
 
 module.exports = function(sequelize, DataTypes) {
-    var Param = sequelize.define('iov_term_params', {
+    var Param = sequelize.define("param", {
         param_id: { type: DataTypes.INTEGER, allowNull: false },
         dword_val: DataTypes.INTEGER,
         string_val: DataTypes.STRING(255)
@@ -14,8 +14,8 @@ module.exports = function(sequelize, DataTypes) {
 
     Param.associate = function(models) {
         Param.removeAttribute('id');
-        Param.belongsTo(models.iov_device, {
-            foreignKey: 'simNo'
+        Param.belongsTo(models.terminal, {
+            foreignKey: 'sim_no'
         });
     };
 

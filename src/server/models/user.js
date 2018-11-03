@@ -1,7 +1,8 @@
 "use strict";
+const bcrypt = require('bcrypt')
 const Sequelize = require('sequelize')
-const _         = require('lodash')
-const tree = require('../utils/tree')
+const _         = require('lodash');
+const tree      = require('../utils/tree');
 
 const Op = Sequelize.Op
 
@@ -9,16 +10,15 @@ const LEVEL_SUPER = 0;
 const LEVEL_MASTER = 1;
 const LEVEL_NORMAL = 100;
 
-const AUTH_TYPE_LIST = ['group', 'menu', 'instruction']
+const AUTH_TYPE_LIST = ['group', 'menu', 'instruction'];
 
 
 module.exports = function(sequelize, DataTypes) {
 
-  const Table = sequelize.define('iov_user', {
-    username: {type: DataTypes.STRING(32), unique: true, allowNull: false},
-    password: DataTypes.STRING(120),
-    creator: DataTypes.STRING(32),
-    type: DataTypes.STRING(50),
+    let Table = sequelize.define("user", {
+        username: {type: DataTypes.STRING(32), unique: true, allowNull: false},//用户名
+        creator: DataTypes.STRING(32),//父用户名
+        password: DataTypes.STRING(120),
         auth_level: { type: DataTypes.INTEGER, defaultValue: LEVEL_NORMAL, allowNull: false },
         enabled: { type: DataTypes.BOOLEAN, defaultValue: true, allowNull: false },//是否可用
         cn_name: DataTypes.STRING(32),//中文名
@@ -32,22 +32,22 @@ module.exports = function(sequelize, DataTypes) {
         login_date: DataTypes.DATE, //登录时间
         ip: DataTypes.STRING(120), //用户机器IP
         login_type: { type: DataTypes.STRING(20), defaultValue: 'WEB', allowNull: false }, //登录方式 (需要数据库字段，当前只有网页登录,手机登录等)
-        version: { type: DataTypes.STRING(120), defaultValue: '', allowNull: false } //客户版本号(需要数据库字段，但当前为空)
-  }, {
-    tableName: 'iov_user',
-    freezeTableName: true,
-    timestamps: true
-  })
+        version: { type: DataTypes.STRING(120), defaultValue: '', allowNull: false }, //客户版本号(需要数据库字段，但当前为空)
+        is_terminal: { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false }
+    }, {
+        tableName: 'iov_user',
+        freezeTableName: true, //选项表示，数据库中的表明与程序中的保持一致，否则数据库中的表名会以复数的形式命名
+    });
 
 
     Table.associate = function(models) {
 
-        Table.hasMany(models.iov_user_auths, {
-            foreignKey: 'userId'
+        Table.hasMany(models.userauth, {
+            foreignKey: 'user_id'
         });
 
-        Table.hasMany(models.iov_user_menus, {
-            foreignKey: 'userId'
+        Table.hasMany(models.usermenu, {
+            foreignKey: 'user_id'
         });
     }
 
@@ -71,43 +71,45 @@ module.exports = function(sequelize, DataTypes) {
      * 
      * local master 拥有除 group 之外的最高权限
      */
-  Table.prototype.getAuths = async function() {
+    Table.prototype.getAuths = function(t) {
 
-    if (this.auths) {
-      return this.auths
+        if (this.auths) {
+            return Promise.resolve(this.auths);
+        }
+
+        let auths = {};
+
+        if (this.isLocalMaster()) {
+            AUTH_TYPE_LIST.forEach(r=> {
+                auths[r] = [tree.treeId([])];
+            });
+
+            if (this.isSuperMaster()) {
+                this.auths = auths;
+                return Promise.resolve(auths);
+            }
+
+            delete auths['group'];
+        }
+
+        return this.getUserauths({
+            attributes: ['ref_path', 'ref_type'],
+            where: {ref_type: {$notIn: Object.keys(auths)}},
+            transaction: t
+        }).then(out=> {
+            out.forEach(r=> {
+                (auths[r.ref_type] || (auths[r.ref_type]=[])).push(tree.treeId(r.ref_path));
+            })
+            this.auths = auths;
+            return auths;
+        })
     }
-
-    const auths = {}
-
-    if (this.isLocalMaster()) {
-      AUTH_TYPE_LIST.forEach(r => {
-        auths[r] = [tree.treeId([])]
-      })
-
-      if (this.isSuperMaster()) {
-        this.auths = auths
-        return auths
-      }
-
-      delete auths['group']
-    }
-
-    const out = await this.getUserauths({
-      where: {ref_type: {[Op.notIn]: Object.keys(auths)}}
-    })
-    
-    out.forEach(r => {
-      (auths[r.ref_type] || (auths[r.ref_type]=[])).push(tree.treeId(r.ref_path))
-    })
-    this.auths = auths
-    return auths
-  }
 
 
     /**
      * 是否有树形结构权限
      */
-    Table.prototype.hasAuth = function(type, id, full) {
+  Table.prototype.hasAuth = function(type, id, full) {
 
         let collect = this.auths && this.auths[type];
         if (!collect) {
@@ -118,8 +120,8 @@ module.exports = function(sequelize, DataTypes) {
             id = tree.treeId([]);
         }
 
-        return id.isChildOf(collect, full);
-    }
+    return full ? id.isChildOf(collect) : id.isChildOfOrEqual(collect)
+  }
 
     Table.prototype.maxAuth = function(type, id) {
 
@@ -130,9 +132,9 @@ module.exports = function(sequelize, DataTypes) {
             let pid = collect[i];
             if (pid.eq(id))
                 r = 0;
-            else if (id.isChildOf(pid))
+            else if (id.isChildOfOrEqual(pid))
                 return 1;
-            else if (pid.isChildOf(id)) {
+            else if (pid.isChildOfOrEqual(id)) {
                 if (r !== 0) {
                     r = -1;
                 }
@@ -163,7 +165,7 @@ module.exports = function(sequelize, DataTypes) {
             ip: this.ip,
             login_type: this.login_type,
             version: this.version,
-            type: this.type
+            is_terminal: this.is_terminal
         };
     }
 
@@ -194,7 +196,7 @@ module.exports = function(sequelize, DataTypes) {
                 ip: this.ip,
                 login_type: this.login_type,
                 version: this.version,
-                type: this.type,
+                is_terminal: this.is_terminal,
                 auths: authlists
             };
         });
@@ -231,7 +233,7 @@ module.exports = function(sequelize, DataTypes) {
                 ip: this.ip,
                 login_type: this.login_type,
                 version: this.version,
-                type: this.type,
+                is_terminal: this.is_terminal,
                 auths: authlists,
                 authsTree: tree
             };
@@ -240,123 +242,162 @@ module.exports = function(sequelize, DataTypes) {
 
     
 
-  Table.prototype.getAuthsTree = async function(models, types) {
+    Table.prototype.getAuthsTree = function(models, types) {
 
-    const {iov_device: Device} = models
+        types = types || ['terminal', 'menu', 'instruction'];
+        let names = [];
 
-    types = types || ['terminal', 'menu', 'instruction']
-    let names = []
+        if (!this.authsTree) {
+            this.authsTree = {};
+        }
 
-    if (!this.authsTree) {
-      this.authsTree = {}
+        return this.getAuths().then((auths)=> {
+
+            let tasks = [];
+
+            types.forEach(t=> {
+                let name = (t === 'terminal') ? 'group' : t;
+                if (this.authsTree[name] == null) {
+
+                    let prop = {};
+
+                    if (name === 'group') {
+                        
+                        prop.include = [{
+                            model: models.terminal
+                        }];
+                        prop.where = {[Op.and]: []};
+                        prop.createNode = (r)=> {
+                            let n = r.asNode();
+                            n.authed = this.maxAuth('group', r.treeId());
+                            if (r.terminal)
+                                n.name = r.terminal.plate_no;
+                            return n;
+                        };
+
+                        if (t === 'group') {
+                            prop.where[Op.and].push({is_terminal: false});
+                        }
+
+                        // 除非单独设定，不显示具体车辆
+                        //let ids = authGroups.map(r=> r.id);
+                        //prop.where[Op.and].push({$or: [{id: {$in:ids}}, {is_terminal: false}]});
+                    } else {
+                        prop.createNode = (r)=> {
+                            let n = r.asNode();
+                            n.authed = this.maxAuth(t, r.treeId());
+                            return n;
+                        };
+                    }
+
+                    names.push(name);
+                    tasks.push(models[name].asTree(auths[name], prop));
+                }
+            });
+
+            return Promise.all(tasks);
+            
+        }).then((rows)=> {
+            names.forEach((t, i)=> {
+                this.authsTree[t] = rows[i].roots;
+            });
+            return this.authsTree;
+        });
     }
 
-    const auths = await this.getAuths()
-    const tasks = []
+    Table.prototype.updateAuth = function(models, newauths, reqUser) {
 
-    types.forEach(t => {
-      const name = (t === 'terminal') ? 'group' : t
-      if (this.authsTree[name] === null) {
-        const prop = {}
+        let UserAuth = models.userauth;
 
-        if (name === 'group') {
-          prop.include = [{
-            model: Device
-          }]
+        return sequelize.transaction(t=> {
 
-          prop.where = {[Op.and]: []}
-          prop.createNode = (r)=> {
-            let n = r.asNode()
-            n.authed = this.maxAuth('group', r.treeId())
-            if (r.terminal)
-              n.name = r.terminal.plateNo
-            return n
-          }
+            // 先获取旧权限
+            return this.getAuths(t).then((oldauths)=> {
 
-          if (t === 'group') {
-            prop.where[Op.and].push({type: {[Op.ne]: 'TERM'}});
-          }
-          // 除非单独设定，不显示具体车辆
-          //let ids = authGroups.map(r=> r.id);
-          //prop.where.$and.push({$or: [{id: {$in:ids}}, {type: {[Op.ne]: 'TERM'}}]})
-        } else {
-          prop.createNode = (r)=> {
-            let n = r.asNode()
-            n.authed = this.maxAuth(t, r.treeId())
-            return n
-          }
+                let records = [];
+                let orRemoves = [];
 
-          names.push(name)
-          tasks.push(models[name].asTree(auths[name], prop))
-        }
-      }
-    })
+                Object.keys(newauths).forEach(k=> {
 
-    const rows = await Promise.all(tasks)
-    names.forEach((t, i) => {
-      this.authsTree[t] = rows[i].roots
-    })
-    return this.authsTree
+                    let news = newauths[k];
+                    let old = oldauths[k];
+
+                    // 过滤掉自身重复, 如父节点已经包含子节点
+                    news = news.filter(id=> !id.isChildOf(news))
+
+                    if (old) {
+                    
+                        // 其他的被删除
+                        let collect = old.filter(id=> _.find(news, r=> r.eq(id)) == null && 
+                                                                reqUser.hasAuth(k, id));
+                        if (collect.length > 0) {
+                            orRemoves.push(UserAuth.authMatch(k, collect))
+                        }
+
+                        // 删除重复的
+                        news = news.filter(id=> _.find(old, r=> r.eq(id)) == null);
+                    }
+
+                    // 过滤掉自身重复, 如父节点已经包含子节点
+                    news.forEach(id=> {
+                        records.push({user_id: this.id, ref_type: k, ref_path: id.stringfy()});
+                    });
+                });
+
+                if (orRemoves.length === 0)
+                    return UserAuth.bulkCreate(records, {transaction: t});
+
+                return UserAuth.destroy({
+                    where: {
+                        user_id: this.id,
+                        $or: orRemoves
+                    },
+                    transaction: t
+                }).then(()=> {
+                    return UserAuth.bulkCreate(records, {transaction: t});
+                })
+            });
+        });
+    };
+
+    Table.prototype.destroySelf = function(models) {
+        return models.userauth.destroy({where: {user_id: this.id}}).then(()=> {
+            return models.usermenu.destroy({where: {user_id: this.id}}).then(()=> {
+                return this.destroy()
+            })
+        })
+    }
+
+  Table.prototype.checkPassword = async function(plain) {
+    if (!this.enabled) {
+        return false
+    }
+    const ret = await bcrypt.compare(plain, this.password)
+    return ret
   }
 
-  Table.prototype.updateAuth = function(models, newauths, reqUser) {
-
-    const {iov_user_auths: UserAuth} = models
-    const userId = this.id
-
-    return sequelize.transaction(async transaction => {
-
-      // 先获取旧权限
-      const oldauths = await this.getAuths()
-      let records = []
-      let orRemoves = []
-
-      Object.keys(newauths).forEach(k => {
-        let news = newauths[k]
-        let old = oldauths[k]
-
-        // 过滤掉自身重复, 如父节点已经包含子节点
-        news = news.filter(id => !id.isChildOf(news, true))
-
-        if (old) {
-          // 其他的被删除
-          let collect = old.filter(id=> _.find(news, r=> r.eq(id)) == null && 
-                                                  reqUser.hasAuth(k, id))
-          if (collect.length > 0) {
-            orRemoves.push(UserAuth.authMatch(k, collect))
-          }
-
-          // 删除重复的
-          news = news.filter(id=> _.find(old, r=> r.eq(id)) == null);
-        }
-
-        // 过滤掉自身重复, 如父节点已经包含子节点
-        news.forEach(id => {
-          records.push({userId, ref_type: k, ref_path: id.stringfy()})
-        })
-      })
-
-      if (orRemoves.length > 0) {
-        await UserAuth.destroy({
-          where: {
-            userId,
-            [Op.or]: orRemoves
-          },
-          transaction
-        })
-      }
-
-      await UserAuth.bulkCreate(records, {transaction})
-    })
+  Table.hashPassword = function(password) {
+    return bcrypt.hash(password, 10)
   }
 
-  Table.prototype.destroySelf = function(models) {
-    const userId = this.id
-    return sequelize.transaction(async transaction => {
-      await models.iov_user_auths.destroy({where: {userId}, transaction})
-      await models.iov_user_menus.destroy({where: {userId}, transaction})
-      await this.destroy({transaction})
-    })
+  Table.createEx = async function (fields, option) {
+    if ('password' in fields) {
+      fields.password = await Table.hashPassword(fields.password)
+    }
+    await Table.create(fields, option)
+  }
+
+  Table.updateEx = async function (fields, option) {
+    if ('password' in fields) {
+      fields.password = await Table.hashPassword(fields.password)
+    }
+    await Table.update(fields, option)
+  }
+
+  // query construction helper
+  Table.validStatus = {
+    enabled: true,
+    due_date: { [Op.or]: [ { [Op.gt]: Date.now() }, { [Op.eq]: null } ] }
   }
 
   return Table

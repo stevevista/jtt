@@ -11,7 +11,7 @@ const defines = []
 const files = fs.readdirSync(__dirname)
 
 for (const f of files) {
-  if (f === 'index.js' || f === 'migration.js') {
+  if (f === 'index.js' || f === 'migration.js' || f === 'GBRegionCodes.js') {
     continue
   }
 
@@ -43,7 +43,7 @@ function importModels(defArray) {
   for (const def of defArray) {
     if (typeof def === 'function') {
       const model = def(sequelize, Sequelize.DataTypes)
-      db[model.tableName] = model
+      db[model.name] = model
     } else {
       importModels(def)
     }

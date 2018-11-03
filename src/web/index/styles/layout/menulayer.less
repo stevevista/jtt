@@ -1,0 +1,189 @@
+@menulayer-marker-line-size: 0px;
+@menulayer-marker-dot-size: 8px;
+@duration: @duration-fastest - .1s;
+.menulayer() {
+    .menulayer {
+        position: absolute;
+        min-width: 35rem;
+        min-height: 28rem;
+        background-color: #fff;
+        border-radius: 2px;
+        z-index: 1000;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+        transform-origin: left top;
+        transition: transform @duration-fastest;
+        transform: scale(0);
+        overflow: hidden;
+        a {
+            cursor: pointer;
+            padding: 1rem;
+            color: @color;
+            display: inline-block;
+            text-align: center;
+            i.icon {
+                display: block;
+                height: 2rem;
+                font-size: 1.7rem;
+            }
+        }
+        &.open {
+            transform: scale(1)!important;
+        }
+        &>.menulayer-header {
+            background-color: @theme;
+            padding: 0 1rem;
+            a {
+                color: #ffffff;
+                padding-left: 1.4rem;
+                padding-right: 1.4rem;
+            }
+        }
+        &>.menulayer-content {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform @duration-fast cubic-bezier(0.58, 0.01, 0.22, 1.07), ;
+            &>div {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                padding: .5rem;
+                &>a {
+                    width: 8rem;
+                    position: relative;
+                    overflow: hidden;
+                    .menuitem();
+                    i.icon {
+                        height: 1.7rem;
+                    }
+                    i.mark {
+                        padding: 0;
+                        background-color: rgb(203, 30, 30);
+                        color: #fff;
+                        display: none;
+                        line-height: 1.5rem;
+                        position: absolute;
+                        right: 6px;
+                        top: 4px;
+                        border-radius: 50%;
+                        width: 1.5rem;
+                        transform: scale(.8);
+                    }
+                    &.has {
+                        i.mark {
+                            display: block;
+                        }
+                    }
+                }
+            }
+        }
+        &>.menulayer-marker {
+            background-color: #fff;
+            height: @menulayer-marker-line-size;
+            transform: translateX(1rem);
+            position: relative;
+            transition: transform @duration-fastest;
+            width: 7rem;
+            &>span {
+                display: block;
+                position: absolute;
+                margin-left: 50%;
+                left: 0 - @menulayer-marker-dot-size;
+                top: -2 * @menulayer-marker-dot-size;
+                border-bottom: @menulayer-marker-dot-size solid #fff;
+                border-top: @menulayer-marker-dot-size solid transparent;
+                border-right: @menulayer-marker-dot-size solid transparent;
+                border-left: @menulayer-marker-dot-size solid transparent;
+                background-color: transparent;
+            }
+        }
+    }
+    .shortcutmanager-layer {
+        .layui-layer-content {
+            border-bottom: @base-border;
+            border-top: @base-border;
+            overflow: hidden;
+            .noselect();
+            button {
+                background-color: transparent;
+                width: 100%;
+                height: 3rem;
+                opacity: .6;
+                &:hover {
+                    opacity: 1;
+                }
+            }
+            span {
+                cursor: pointer;
+                display: block;
+                padding: .8rem 0 .8rem .8rem;
+                text-decoration: none;
+                text-transform: uppercase;
+                color: @color;
+                background-color: rgba(0, 0, 0, 0.1);
+                &.dragover {
+                    outline: 1px dashed rgba(0, 0, 0, 0.2);
+                }
+                &.isshortcut {
+                    display: none!important;
+                }
+                &>i {
+                    margin-top: 1px;
+                    margin-right: 5px;
+                    display: inline;
+                    &.icon {
+                        margin-right: .6rem;
+                    }
+                }
+                &[data-menuid] {
+                    padding-left: 3rem;
+                    background-color: transparent;
+                    &:hover {
+                        background-color: rgba(0, 0, 0, .1);
+                    }
+                    &.selected {
+                        background-color: rgba(0, 0, 0, .2);
+                    }
+                }
+            }
+            .flex();
+            .left {
+                flex: 1.2;
+                overflow-y: auto;
+            }
+            .center {
+                width: 4rem;
+                padding-top: 207px;
+                border-left: @base-border;
+                border-right: @base-border;
+            }
+            .right {
+                flex: 1;
+                position: relative;
+                padding-left: 1rem;
+                span {
+                    top: 0;
+                    width: 100%;
+                    position: absolute;
+                    transition: transform @duration-fast, opacity @duration-fast;
+                }
+            }
+            .order {
+                width: 3rem;
+                border-left: @base-border;
+                button {
+                    i {
+                        transform: rotateZ(-90deg);
+                    }
+                }
+            }
+        }
+        .layui-layer-btn1 {
+            color: #47a3da;
+        }
+        .layui-layer-btn2 {
+            opacity: .6;
+            font-size: 1rem;
+        }
+    }
+}

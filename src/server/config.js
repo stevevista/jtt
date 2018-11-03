@@ -25,7 +25,6 @@ const envConfigPath = path.join(configDir, process.env.NODE_ENV + '.yml')
 
 let config = {
   configDir,
-  logdir: 'storage',
   tmpdir: 'tmp',
   ssldir: 'ssl',
   ssl: true,
@@ -35,7 +34,7 @@ let config = {
   database: {
     host: 'localhost',
     dialect: 'sqlite',
-    operatorsAliases: false
+    // operatorsAliases: false
   },
   appLogFilename: 'jtt808.log',
   jtt808: {
@@ -51,10 +50,6 @@ if (!fs.existsSync(basConfigPath)) {
 config = _.merge(config, requireJs(basConfigPath))
 if (fs.existsSync(envConfigPath)) {
   config = _.merge(config, requireJs(envConfigPath))
-}
-
-if (config.logdir[0] !== '/') {
-  config.logdir = path.join(workDir, config.logdir)
 }
 
 function resolvePath (obj, key, basedir) {
@@ -118,15 +113,6 @@ if (config.ssl) {
 
 // init storage
 if (cluster.isMaster) {
-  if (!fs.existsSync(config.logdir)) {
-    try {
-      fs.mkdirSync(config.logdir)
-    } catch (e) {
-      console.error('cannot initialize storage', e.message)
-      process.exit(1)
-    }
-  }
-
   if (!fs.existsSync(config.tmpdir)) {
     try {
       fs.mkdirSync(config.tmpdir)

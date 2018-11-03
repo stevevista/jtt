@@ -1,0 +1,13 @@
+settings.language: Language
+settings.adb: ADB
+settings.about: About
+settings.devSerial: Serial
+settings.logLevel: Log Level
+settings.port: Server Port
+settings.user: User
+settings.user-level: Level
+settings.server-group: Server
+settings.user-group: Login info
+settings.users-group: User List
+settings.exceptionPath: Exceptions Info
+sidebar.setting: Setting

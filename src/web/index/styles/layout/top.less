@@ -1,0 +1,108 @@
+.top() {
+    min-height: @header-height;
+    display: flex;
+    border-bottom: @base-border;
+    background-color: @top-theme;
+    .toggle-leftmenu {
+        display: none;
+    }
+    .toggle-leftmenu,
+    .toggle-menulayer {
+        border-right: @top-nav-r-border;
+        border-left: @top-nav-l-border;
+        min-width: 5rem;
+        .ripples(50px, rgba(0, 0, 0, 0.1));
+        .toggle();
+    }
+    .topmenu {
+        min-height: 65px;
+        min-width: 38rem;
+        &>li {
+            border-left: @top-nav-l-border;
+            // min-width: 10rem;
+            text-align: center;
+            &:not(:last-child) {
+                border-right: @top-nav-r-border;
+            }
+            >a {
+                // height: 5rem;
+                font-size: 1.2rem;
+                padding-top: 1rem;
+                padding-bottom: 1rem;
+                .menuitem();
+                &>i {
+                    height: 2rem;
+                    display: block;
+                    text-align: center;
+                    font-size: 1.5rem;
+                }
+            }
+            &>ul {
+                min-width: 20rem;
+            }
+        }
+    }
+    @media (max-width: 1680px) {
+        .topmenu {
+            &>li:nth-of-type(n+13) {
+                display: none;
+            }
+        }
+    }
+    @media (max-width: 1440px) {
+        .topmenu {
+            &>li:nth-of-type(n+11) {
+                display: none;
+            }
+        }
+    }
+    @media (max-width: 1280px) {
+        .topmenu {
+            &>li:nth-of-type(n+9) {
+                display: none;
+            }
+        }
+    }
+    @media (max-width: 1024px) {
+        .topmenu {
+            &>li:nth-of-type(n+6) {
+                display: none;
+            }
+        }
+    }
+    &>ul:last-child {
+        flex: 1;
+        min-width: 10rem;
+        &>li {
+            float: right;
+            height: 100%;
+            .dropdown-menu {
+                left: auto;
+                right: 0;
+            }
+            &>a {
+                margin-top: -20px;
+                top: 50%;
+                padding: 1rem;
+            }
+        }
+    }
+    a:not(.no-ripples) {
+        color: @color;
+        .ripples();
+    }
+    @keyframes gd {
+        35% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-100%);
+        }
+        85% {
+            transform: translateY(-100%);
+        }
+        100% {
+            transform: translateY(0%);
+        }
+    }
+}

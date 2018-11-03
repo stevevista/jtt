@@ -1,0 +1,32 @@
+@import "../_var.less";
+@n:progress;
+.@{n}-layer{
+    .@{n}{
+        width: 100%;
+        background: rgba(0,0,0,.15);
+        overflow-x: hidden;
+        .@{n}-bar {
+            position: relative;
+            background-color:@green;
+            height: 1.6rem;
+            width:0;
+            transition: @duration-fastest linear;
+            transition-property: width;
+        }
+    }
+    .@{n}-text{
+        font-size: 1.5rem;
+        color:@color;
+        padding: 1rem 0 0 1rem;
+    }
+    .layui-layer-setwin{
+        display:none;
+    }
+    .layui-layer-btn{
+        padding:0;
+        padding-bottom: .5rem;
+        a{
+            color:@color;
+        }
+    }
+}

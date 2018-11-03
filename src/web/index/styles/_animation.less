@@ -1,0 +1,42 @@
+@keyframes zoomIn {
+    from {
+        transform: scale(0);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+@keyframes zoomInTop {
+    from {
+        transform: scale(1,0);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+.zoomInLeftTop {
+    animation-name: zoomIn;
+    animation-duration: @duration-fastest;
+    transform-origin: top left;
+}
+.zoomInRightTop{
+	&:extend(.zoomInLeftTop);
+	transform-origin: top right;
+}
+
+.zoomInRightBottom{
+	&:extend(.zoomInLeftTop);
+	transform-origin: bottom right;
+}
+.zoomInLeftBottom{
+	&:extend(.zoomInLeftTop);
+	transform-origin: bottom left;
+}
+
+.zoomInTop{
+	&:extend(.zoomInLeftTop);
+    animation-name: zoomInTop;
+	transform-origin: top;
+}
+
+

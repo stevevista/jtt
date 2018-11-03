@@ -50,7 +50,11 @@ app
   .use(router.routes())
   .use(router.allowedMethods())
 
-app.use(serveStatic('/', path.join(__dirname, '../public'), {gzip: true}))
+  if (process.env.NODE_ENV === 'development') {
+    app.use(serveStatic('/', path.join(__dirname, '../../dist/public'), {gzip: true}))
+  } else {
+    app.use(serveStatic('/', path.join(__dirname, '../public'), {gzip: true}))
+  }
 
 const server = http.createServer(app.callback())
 if (config.websocket) {
